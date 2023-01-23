@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  .input-group.mb-3
+    .input-group-prepend
+      span#inputGroupFileAddon01.input-group-text https://www.youtube.com/watch?v=
+    input#url.form-control(type='text' placeholder='add url' aria-label="Recipient's username" aria-describedby='button-addon2')
+    .input-group-append
+      button#button-add.btn.btn-primary(type='button') ADD
+  button#button-submit.btn.btn-warning.mb-2(type='button') PROCESS
+  button#button-clear.btn.btn-danger.mb-2.ml-2(type='button') CLEAR
+  ul#list-url.list-group.text-dark
+
+
+

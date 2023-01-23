@@ -1,0 +1,21 @@
+extends layout
+
+block content
+    table.table
+        thead.bg-info.text-white
+            tr
+                th(scope='col' width="4%") #
+                th(scope='col' width="4%") Title
+                th(scope='col' width="4%") Author
+                th(scope='col' width="4%") Description
+                th(scope='col' width="4%") Url
+        tbody.text-dark.bg-light
+            each item, i in items
+                tr
+                    td #{(i+1)}
+                    td #{item.title}
+                    td #{item.author}
+                    td #{item.description.substring(0, 100)}
+                    td #{item.url}
+
+

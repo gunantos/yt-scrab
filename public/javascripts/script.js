@@ -1,5 +1,9 @@
 "use strict";
 const LIST_URL = [];
+ function toast(msg) {
+        $('.toast>.toast-body').html(msg);
+        $('.toast').toast('show');
+    }
 $(function () {
     $(".nav").find(".active").removeClass("active");
 
@@ -11,10 +15,6 @@ $(function () {
                 $(navlist[i]).addClass('active')
             }
         }
-    }
-    function toast(msg) {
-        $('.toast>.toast-body').html(msg);
-        $('.toast').toast('show');
     }
     $('#button-add').click(function () {
         var url = $('#url')
@@ -45,15 +45,13 @@ $(function () {
             $('#button-add').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>')
             $('#button-submit').attr('disabled');
             $('#button-submit').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>')
-            let i = 0;
-            LIST_URL.map(async function (itm) {
-                await saveData(i);
-                i++;
-            })
-            $('#button-add').removeAttr('disabled');
+            process().then(() => {
+                $('#button-add').removeAttr('disabled');
             $('#button-submit').removeAttr('disabled');
             $('#button-add').html('ADD')
             $('#button-submit').html('PROCESS')
+            })
+            
         }
     });
     $('#button-clear').click(function () {
@@ -61,9 +59,18 @@ $(function () {
         $('#list-url').html('')
     })
 });
-async function saveData(i) {
-    return new Promise((resolve, reject) => {
-    var data = { url: LIST_URL[i]}
+async function process() {
+    await new Promise(resolve => {
+        LIST_URL.forEach(async (itm, i) => {
+            await saveData(i, itm)
+            setTimeout(5000);
+        })
+        resolve();
+    })
+}
+async function saveData(i,itm) {
+    return await new Promise((resolve, reject) => {
+    var data = { url: itm}
     $.ajax({
         type: "POST",
         data: data,
@@ -77,12 +84,16 @@ async function saveData(i) {
                         <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
                         </svg>
                         `);
-                                        } else {
+            } else {
                                             $('#badge-ke-' + i).html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#dc3545" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
                         </svg>`);
             }
             resolve(true);            
+        },
+        error: function () {
+            toast('Terjadi keasalahn')
+            resolve(true)
         }
     });
         

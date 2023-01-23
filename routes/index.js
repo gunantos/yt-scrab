@@ -19,12 +19,23 @@ router.post('/', async function (req, res, next) {
     const video = await scrapper.getVideoInfo(url);
     const videoDetail = video.details
     var cek = await query.get('SELECT count(video_id) as ttl from items WHERE video_id="' + videoDetail.id + '" LIMIT 1');
-    var jlh = cek[0] != undefined ? cek[0].ttl : 1;
+    var jlh = cek[0] != undefined ? cek[0].ttl : 0;
     console.log(cek[0].ttl)
     if (jlh < 1) {
+      var des = videoDetail.shortDescription.replace(/<\/?[^>]+(>|$)/g, "");
+      des = des.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ' ');
+      des = des.replace(/'/g, '')
+      des = des.replace(/"/g, '')
+      des = des.replace(/(\r\n|\n|\r)/gm, "");
+      var descr = '';
+      for (var i=0; i<des.length; i++) {
+          if (des.charCodeAt(i) <= 127) {
+              descr += des.charAt(i);
+          }
+      }
       var down = await scrapper.downloadFromVideo(video).pipe(createWriteStream("./public/video/" + videoDetail.id + ".ogg"));
       var sql = `INSERT INTO items (video_id, title, description, keywords, duration, url, author) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-      db.query(sql, [videoDetail.id, videoDetail.title, videoDetail.shortDescription, videoDetail.keywords.join(','), videoDetail.duration, videoDetail.url, videoDetail.author], function (err, result) {
+      db.query(sql, [videoDetail.id, videoDetail.title, descr, videoDetail.keywords.join(','), videoDetail.duration, videoDetail.url, videoDetail.author], function (err, result) {
         if (err) {
           return res.json({ 'status': false, 'message': 'Gagal menyimpan file', error: err });
         } else {
@@ -35,7 +46,7 @@ router.post('/', async function (req, res, next) {
       return res.json({ 'status': false, 'message': 'URL Video telah di download'});
     }
   } catch (error) {
-   return res.json({ 'status': false, 'message': error.toString()});
+    return res.json({ 'status': false, 'message': error.toString()});
   }
   
   
